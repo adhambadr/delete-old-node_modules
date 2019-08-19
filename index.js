@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import fs from 'fs'
 import path from 'path'
-
+import rimraf from 'rimraf'
 const threshold = 1; // Month
 let saved = 0;
 let counter = 0;
@@ -19,6 +19,8 @@ const deleteFolder = ({ folder ,stats})=>{
 	console.log(" Deleting " , folder);
 	saved += stats.size
 	counter ++;
+
+	rimraf.sync(folder);
 }
 
 const cleanDirectory =  ({rootDirectory = ".", verbose = false})=>{
@@ -38,6 +40,10 @@ const cleanDirectory =  ({rootDirectory = ".", verbose = false})=>{
 					deleteFolder({
 						stats , folder : current 
 					})
+				else{
+					if(verbose)
+					console.log("TOO NEW:",current)
+				}
 				
 			}
 			else
@@ -45,7 +51,9 @@ const cleanDirectory =  ({rootDirectory = ".", verbose = false})=>{
 		}
 	})
 }
-
-cleanDirectory({});
-console.log("Searched",searchCounter," olders")
-console.log("Saved "+counter+" folder",saved , saved/1000000.0 + "MB")
+const args = process.argv;
+cleanDirectory({
+	rootDirectory : _.nth(args , 2)
+});
+console.log("Searched",searchCounter,"folders")
+console.log("Deleted "+counter+" node_modules folder")
